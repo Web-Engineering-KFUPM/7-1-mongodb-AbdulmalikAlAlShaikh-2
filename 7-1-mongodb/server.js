@@ -184,21 +184,66 @@
  *  This is the default behavior of Mongoose.
  */
 
-// import mongoose
+import mongoose from "mongoose";
 
-// establish connection
+// TODO-1: establish connection
+const MONGO_URI =
+  process.env.MONGO_URI ||
+  "mongodb+srv://HasanDB:<db_password>@cluster0.rygtjue.mongodb.net/TestDB";
 
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err.message));
 
-// define schema
+// TODO-2: define schema
+const studentSchema = new mongoose.Schema({
+  name: String,
+  age: Number,
+  major: String,
+});
 
+const Student = mongoose.model("Student", studentSchema);
 
-// create document
+// TODO-3: create document
+async function createStudents() {
+  await Student.insertMany([
+    { name: "Ali", age: 21, major: "CS" },
+    { name: "Sara", age: 23, major: "SE" },
+  ]);
+  console.log("✅ Inserted");
+}
 
+// TODO-4: read document
+async function readStudents() {
+  const all = await Student.find();
+  console.log(all);
+}
 
-// read document
+// TODO-5: update document
+async function updateStudent() {
+  await Student.updateOne({ name: "Ali" }, { $set: { age: 22 } });
+  console.log("✅ Updated Ali");
+}
 
+// TODO-6: delete document
+async function deleteStudent() {
+  await Student.deleteOne({ name: "Sara" });
+  console.log("✅ Deleted Sara");
+}
 
-// update document
+async function runLabFlow() {
+  try {
+    await createStudents();
+    await readStudents();
+    await updateStudent();
+    await deleteStudent();
+    await readStudents();
+  } catch (err) {
+    console.error("❌ CRUD flow error:", err.message);
+  } finally {
+    await mongoose.connection.close();
+    console.log("🔌 Disconnected from MongoDB");
+  }
+}
 
-
-// delete document
+runLabFlow();
